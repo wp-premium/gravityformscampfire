@@ -5,7 +5,7 @@ GFForms::include_feed_addon_framework();
 class GFCampfire extends GFFeedAddOn {
 
 	protected $_version = GF_CAMPFIRE_VERSION;
-	protected $_min_gravityforms_version = '1.9.12';
+	protected $_min_gravityforms_version = '1.9.14.26';
 	protected $_slug = 'gravityformscampfire';
 	protected $_path = 'gravityformscampfire/campfire.php';
 	protected $_full_path = __FILE__;
@@ -33,10 +33,29 @@ class GFCampfire extends GFFeedAddOn {
 	 */
 	public static function get_instance() {
 		
-		if ( self::$_instance == null )
+		if ( self::$_instance == null ) {
 			self::$_instance = new self;
+		}
 
 		return self::$_instance;
+		
+	}
+
+	/**
+	 * Plugin starting point. Adds PayPal delayed payment support.
+	 * 
+	 * @access public
+	 * @return void
+	 */
+	public function init() {
+		
+		parent::init();
+		
+		$this->add_delayed_payment_support(
+			array(
+				'option_label' => esc_html__( 'Send message to Campfire only when payment is received.', 'gravityformscampfire' )
+			)
+		);
 		
 	}
 
@@ -220,6 +239,18 @@ class GFCampfire extends GFFeedAddOn {
 	public function can_create_feed() {
 		
 		return $this->initialize_api();
+		
+	}
+
+	/**
+	 * Enable feed duplication.
+	 * 
+	 * @access public
+	 * @return bool
+	 */
+	public function can_duplicate_feed() {
+		
+		return true;
 		
 	}
 

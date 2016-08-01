@@ -24,59 +24,45 @@ class Campfire {
 		
 		/* Build request URL. */
 		$request_url = 'https://' . $this->subdomain . '.campfirenow.com/' . $path . '.json';
-					
-		/* Initialize cURL session. */
-		$curl = curl_init();
 		
-		/* Setup cURL options. */
-		curl_setopt( $curl, CURLOPT_URL, $request_url );
-		curl_setopt( $curl, CURLOPT_RETURNTRANSFER, 1 );
-		curl_setopt( $curl, CURLOPT_SSL_VERIFYPEER, $this->verify_ssl );
-		curl_setopt( $curl, CURLOPT_USERPWD, $this->api_token . ':x' );
-		curl_setopt( $curl, CURLOPT_HTTPHEADER, array( 'Accept: application/json', 'Content-Type: application/json' ) );
-			
-		/* If this is a POST request, pass the request options via cURL option. */
-		if ( $method == 'POST' ) {
-			
-			curl_setopt( $curl, CURLOPT_POST, true );
-			curl_setopt( $curl, CURLOPT_POSTFIELDS, json_encode( $options ) );
-			
+		/* Setup request arguments. */
+		$args = array(
+			'headers'   => array(
+				'Accept'        => 'application/json',
+				'Authorization' => 'Basic ' . base64_encode( $this->api_token . ':x' ),
+				'Content-Type'  => 'application/json'
+			),
+			'method'    => $method,
+			'sslverify' => $this->verify_ssl	
+		);
+
+		/* Add request options to body of POST and PUT requests. */
+		if ( $method == 'POST' || $method == 'PUT' ) {
+			$args['body'] = json_encode( $options );
 		}
 
-		/* If this is a PUT request, pass the request options via cURL option. */
-		if ( $method == 'PUT' ) {
+		/* Execute request. */
+		$result = wp_remote_request( $request_url, $args );
 			
-			curl_setopt( $curl, CURLOPT_CUSTOMREQUEST, 'PUT' );
-			curl_setopt( $curl, CURLOPT_POSTFIELDS, json_encode( $options ) );
-			
+		/* If WP_Error, throw exception */
+		if ( is_wp_error( $result ) ) {
+			throw new Exception( 'Request failed. '. $result->get_error_messages() );
+		}
+
+		/* Decode JSON. */
+		$decoded_result = json_decode( $result['body'], true );
+		
+		/* If invalid JSON, return original result body. */
+		if ( json_last_error() !== JSON_ERROR_NONE ) {
+			return trim( $result['body'] );
 		}
 		
-		/* Execute cURL request. */
-		$curl_result = curl_exec( $curl );
-		
-		/* If there is an error, die with error message. */
-		if ( $curl_result === false ) {
-			
-			die( 'cURL error: '. curl_error( $curl ) );
-			
+		/* If return key is set and exists, return array item. */
+		if ( $return_key && array_key_exists( $return_key, $decoded_result ) ) {
+			return $decoded_result[ $return_key ];
 		}
 		
-		/* Close cURL session. */
-		curl_close( $curl );
-		
-		/* Attempt to decode JSON. If isn't JSON, return raw cURL result. */
-		$json_result = json_decode( $curl_result, true );
-		$curl_result = trim( $curl_result );
-		
-		if ( ! is_array( $json_result ) && ! empty( $curl_result ) ) {
-			throw new Exception( $curl_result );
-		}
-		
-		if ( ! empty( $return_key ) ) {
-			return $json_result[ $return_key ];
-		} else {
-			return $json_result;
-		}
+		return $decoded_result;
 		
 	}
 	

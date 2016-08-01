@@ -1,0 +1,9 @@
+-----------------------------------------------------------
+1.1
+	- Added feed duplication support.
+	- Added support for delaying feed processing until payment by PayPal Standard is successfully completed.
+	- Updated Campfire API library to use WordPress API functions.
+  
+-----------------------------------------------------------
+1.0
+	- It's all new!
