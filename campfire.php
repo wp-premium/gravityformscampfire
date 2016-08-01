@@ -4,7 +4,7 @@
 Plugin Name: Gravity Forms Campfire Add-On
 Plugin URI: http://www.gravityforms.com
 Description: Integrates Gravity Forms with Campfire allowing alerts for Gravity Forms activity to be posted to your Campfire rooms.
-Version: 1.0
+Version: 1.1
 Author: rocketgenius
 Author URI: http://www.rocketgenius.com
 Text Domain: gravityformscampfire
@@ -29,7 +29,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-define( 'GF_CAMPFIRE_VERSION', '1.0' );
+define( 'GF_CAMPFIRE_VERSION', '1.1' );
 
 add_action( 'gform_loaded', array( 'GF_Campfire_Bootstrap', 'load' ), 5 );
 
